@@ -19,6 +19,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 # **Impact:** Properly loading the dataset ensures we have the data available for further processing and analysis.
 df = pd.read_csv('E:/Honars(DS)/Data Science/Netflix Content Recommendation System/netflix_titles.csv')
 
+#show_id	type	title	director	cast	country	date_added	release_year	rating	duration	listed_in	description
+#Above are the columns
+
 # Step 1: Data Preprocessing
 
 # Check for missing values in the dataset
