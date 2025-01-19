@@ -11,6 +11,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from wordcloud import WordCloud
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 # Load the dataset (replace with the correct file path)
 # **Business Objective:** Load the dataset to perform analysis and build a recommendation system
@@ -122,3 +124,43 @@ if 'duration' in df.columns:
 # **Impact:** Helps confirm that the data is properly cleaned and ready for analysis and modeling.
 print("\nFirst few rows of the cleaned dataset:")
 print(df.head())
+
+# Step 3: Content-Based Recommendation System
+
+# 3.1: TF-IDF Vectorization for Movie Descriptions
+# **Business Objective:** Convert movie descriptions into numerical features using TF-IDF for similarity-based recommendations.
+# **Impact:** TF-IDF will help capture the most important words in each description, making it possible to compare the similarity between movies based on their descriptions.
+tfidf_vectorizer = TfidfVectorizer(stop_words='english')
+
+# Fit and transform the descriptions into a TF-IDF matrix
+tfidf_matrix = tfidf_vectorizer.fit_transform(df['cleaned_description'])
+
+# 3.2: Compute Cosine Similarity
+# **Business Objective:** Measure the similarity between each pair of movies using cosine similarity.
+# **Impact:** Cosine similarity will allow us to find movies with similar descriptions, enhancing the recommendation system.
+cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
+
+# 3.3: Build the Recommendation Function
+# **Business Objective:** Create a function that recommends movies based on similarity to a given movie's description.
+# **Impact:** This function will help provide users with movie recommendations based on a given title.
+def recommend_movie(title, cosine_sim=cosine_sim):
+    # Get the index of the movie that matches the title
+    idx = df.index[df['title'] == title].tolist()[0]
+    
+    # Get the pairwise similarity scores for the movie with all other movies
+    sim_scores = list(enumerate(cosine_sim[idx]))
+    
+    # Sort the movies based on similarity scores (highest similarity first)
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+    
+    # Get the indices of the top 10 most similar movies (excluding the movie itself)
+    sim_scores = sim_scores[1:11]
+    movie_indices = [i[0] for i in sim_scores]
+    
+    # Return the top 10 most similar movies
+    return df['title'].iloc[movie_indices]
+
+# Example usage: Recommend movies similar to 'The Matrix'
+recommended_movies = recommend_movie('The Matrix')
+print("\nRecommended Movies based on 'The Matrix':")
+print(recommended_movies)
